@@ -7,7 +7,20 @@
 import UIKit
 import Combine
 
+enum NewsCategory {
+    case auto
+    case company
+
+    var tag: String {
+        switch self {
+        case .auto: return "avto-novosti"
+        case .company: return "novosti-kompanii"
+        }
+    }
+}
+
 final class NewsListViewController: UIViewController {
+    private let category: NewsCategory
     private let viewModel: NewsListViewModel
     private var layoutMode: NewsLayoutMode = .list
     private var items: [NewsItem] = []
@@ -21,7 +34,10 @@ final class NewsListViewController: UIViewController {
     }()
 
     private lazy var collectionView: UICollectionView = {
-        let view = UICollectionView(frame: .zero, collectionViewLayout: NewsLayoutFactory.makeLayout(mode: layoutMode))
+        let view = UICollectionView(
+            frame: .zero,
+            collectionViewLayout: NewsLayoutFactory.makeLayout(mode: layoutMode)
+        )
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = .systemBackground
         view.dataSource = self
@@ -30,9 +46,11 @@ final class NewsListViewController: UIViewController {
         return view
     }()
 
-    init(viewModel: NewsListViewModel) {
+    init(category: NewsCategory, viewModel: NewsListViewModel) {
+        self.category = category
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
+        self.title = category == .auto ? "Авто" : "Компании"
     }
 
     required init?(coder: NSCoder) {
@@ -41,16 +59,10 @@ final class NewsListViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Новости"
-        navigationItem.largeTitleDisplayMode = .always
-        navigationController?.navigationBar.prefersLargeTitles = true
-        view.backgroundColor = .systemBackground
-
         setupUI()
         bind()
-
         modeControl.addTarget(self, action: #selector(modeChanged), for: .valueChanged)
-        viewModel.loadInitial()
+        viewModel.loadInitial(category: category)
     }
 }
 
@@ -97,32 +109,31 @@ extension NewsListViewController: UICollectionViewDelegate {
 
 // MARK: Private
 private extension NewsListViewController {
-        func bind() {
-            viewModel.$items
-                .receive(on: DispatchQueue.main)
-                .sink { [weak self] items in
-                    guard let self else { return }
-                    self.items = items
-                    self.collectionView.reloadData()
-                }
-                .store(in: &cancellables)
+    func bind() {
+        viewModel.$items
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] items in
+                self?.items = items
+                self?.collectionView.reloadData()
+            }
+            .store(in: &cancellables)
 
-            viewModel.$isLoading
-                .receive(on: DispatchQueue.main)
-                .sink { isLoading in
-                    print("loading:", isLoading)
-                }
-                .store(in: &cancellables)
-        }
+        viewModel.$isLoading
+            .receive(on: DispatchQueue.main)
+            .sink { isLoading in
+                print("loading:", isLoading)
+            }
+            .store(in: &cancellables)
+    }
 
-        @objc func modeChanged() {
-            layoutMode = modeControl.selectedSegmentIndex == 0 ? .list : .grid
-            collectionView.setCollectionViewLayout(
-                NewsLayoutFactory.makeLayout(mode: layoutMode),
-                animated: true
-            )
-            collectionView.reloadData()
-        }
+    @objc func modeChanged() {
+        layoutMode = modeControl.selectedSegmentIndex == 0 ? .list : .grid
+        collectionView.setCollectionViewLayout(
+            NewsLayoutFactory.makeLayout(mode: layoutMode),
+            animated: true
+        )
+        collectionView.reloadData()
+    }
 }
 
 // MARK: SetupUI

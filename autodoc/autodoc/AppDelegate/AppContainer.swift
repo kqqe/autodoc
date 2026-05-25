@@ -6,16 +6,44 @@
 //
 
 import Foundation
+import UIKit
 
 final class AppContainer {
     static let shared = AppContainer()
-
+    
+    let settingsService = SettingsService()
+    private let apiClient = APIClient()
+    private let imageLoader = ImageLoader.shared
+    
     private init() {}
 
-    func makeNewsListViewModel() -> NewsListViewModel {
-        let apiClient = APIClient()
+    func makeNewsAutoScreen() -> UIViewController {
         let repository = NewsRepository(apiClient: apiClient)
-        let imageLoader = ImageLoader.shared
-        return NewsListViewModel(repository: repository, imageLoader: imageLoader)
+        let viewModel = NewsListViewModel(
+            repository: repository,
+            imageLoader: imageLoader,
+            settingsService: settingsService,
+            currentCategory: .auto
+        )
+        let viewController = NewsListViewController(category: .auto, viewModel: viewModel)
+        return viewController
+    }
+    
+    func makeNewsCompanyScreen() -> UIViewController {
+        let repository = NewsRepository(apiClient: apiClient)
+        let viewModel = NewsListViewModel(
+            repository: repository,
+            imageLoader: imageLoader,
+            settingsService: settingsService,
+            currentCategory: .company
+        )
+        let viewController = NewsListViewController(category: .company, viewModel: viewModel)
+        return viewController
+    }
+    
+    func makeSettingsScreen() -> UIViewController {
+        let viewModel = SettingsViewModel(settingsService: settingsService)
+        let viewController = SettingsViewController(viewModel: viewModel)
+        return viewController
     }
 }

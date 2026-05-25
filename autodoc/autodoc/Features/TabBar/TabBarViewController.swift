@@ -8,22 +8,28 @@
 import UIKit
 
 final class TabBarController: UITabBarController {
-    override func viewDidLoad() {
-        super.viewDidLoad()
+    
+    init(
+        autoViewController: UIViewController,
+        companyViewController: UIViewController,
+        settingsViewController: UIViewController
+    ) {
+        super.init(nibName: nil, bundle: nil)
 
-        let news = UINavigationController(
-            rootViewController: NewsListViewController(
-                viewModel: AppContainer.shared.makeNewsListViewModel()
-            )
-        )
-        news.tabBarItem = UITabBarItem(title: "Авто новости", image: UIImage(systemName: "newspaper"), tag: 0)
+        let autoNav = UINavigationController(rootViewController: autoViewController)
+        autoNav.tabBarItem = UITabBarItem(title: "Авто", image: UIImage(systemName: "car.fill"), tag: 0)
 
-        let favorites = UINavigationController(rootViewController: PlaceholderViewController(titleText: "Избранное", color: .systemYellow))
-        favorites.tabBarItem = UITabBarItem(title: "Новости компании", image: UIImage(systemName: "star"), tag: 1)
+        let companyNav = UINavigationController(rootViewController: companyViewController)
+        companyNav.tabBarItem = UITabBarItem(title: "Компании", image: UIImage(systemName: "building.2.fill"), tag: 1)
 
-        let profile = UINavigationController(rootViewController: PlaceholderViewController(titleText: "Профиль", color: .systemBlue))
-        profile.tabBarItem = UITabBarItem(title: "Настройки", image: UIImage(systemName: "person"), tag: 2)
+        let settingsNav = UINavigationController(rootViewController: settingsViewController)
+        settingsNav.tabBarItem = UITabBarItem(title: "Настройки", image: UIImage(systemName: "gearshape.fill"), tag: 2)
 
-        viewControllers = [news, favorites, profile]
+        viewControllers = [autoNav, companyNav, settingsNav]
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 }
+
