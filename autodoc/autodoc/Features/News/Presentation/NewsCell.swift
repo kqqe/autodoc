@@ -43,6 +43,7 @@ final class NewsCell: UICollectionViewCell {
         view.spacing = 8
         return view
     }()
+    
 
     private var listImageHeightConstraint: NSLayoutConstraint!
     private var gridImageAspectConstraint: NSLayoutConstraint!

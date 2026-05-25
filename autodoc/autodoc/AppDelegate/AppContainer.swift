@@ -15,6 +15,7 @@ final class AppContainer {
     func makeNewsListViewModel() -> NewsListViewModel {
         let apiClient = APIClient()
         let repository = NewsRepository(apiClient: apiClient)
-        return NewsListViewModel(repository: repository)
+        let imageLoader = ImageLoader.shared
+        return NewsListViewModel(repository: repository, imageLoader: imageLoader)
     }
 }
